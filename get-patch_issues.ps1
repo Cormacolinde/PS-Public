@@ -15,7 +15,7 @@ foreach ($domaincontroller in $domaincontrollers) {
 
 #DCOM changes (https://support.microsoft.com/en-us/topic/kb5004442-manage-changes-for-windows-dcom-server-security-feature-bypass-cve-2021-26414-f1400b52-c141-43d2-941e-37ed901c769c)
 foreach ($server in $servers){
-    $results += #Invoke-Command -ComputerName $server.dnshostname -ScriptBlock{ Get-WinEvent -FilterHashtable @{Logname = "System" ; ID = 10036} -ea silentlycontinue }
+    $results += Invoke-Command -ComputerName $server.dnshostname -ScriptBlock{ Get-WinEvent -FilterHashtable @{Logname = "System" ; ID = 10036} -ea silentlycontinue }
 }
 
 #Netlogon changes (https://support.microsoft.com/en-us/topic/kb5021130-how-to-manage-the-netlogon-protocol-changes-related-to-cve-2022-38023-46ea3067-3989-4d40-963c-680fd9e8ee25)
