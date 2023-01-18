@@ -4,7 +4,7 @@ $base_dn = (get-addomain).DistinguishedName
 #Get DCs
 $domaincontrollers = (get-addomain).replicadirectoryservers
 #Get servers
-$servers = get-adcomputer -SearchBase $base_dn -filter 'OperatingSystem -like "*Server*"'
+$servers = get-adcomputer -SearchBase $base_dn -filter 'OperatingSystem -like "*Server*"' -properties lastlogondate | Where-Object {($_.Lastlogondate -gt (get-date).AddDays(-2)) -and ($_.enabled -eq $true)}
 $results = @()
 
 #AD Permissions changes (https://support.microsoft.com/en-us/topic/kb5008383-active-directory-permissions-updates-cve-2021-42291-536d5555-ffba-4248-a60e-d6cbc849cde1)
@@ -15,6 +15,19 @@ foreach ($domaincontroller in $domaincontrollers) {
 
 #DCOM changes (https://support.microsoft.com/en-us/topic/kb5004442-manage-changes-for-windows-dcom-server-security-feature-bypass-cve-2021-26414-f1400b52-c141-43d2-941e-37ed901c769c)
 foreach ($server in $servers){
+    #Cheack reachability using a ping
+    if (!(Test-Connection -quiet -count 1 $server.dnshostname)) {
+        write-warning "$($server.name) is not reachable with ICMP."
+        continue
+    }
+    #Check availability using WMI
+    Try{
+        Get-WmiObject -class win32_computersystem -ComputerName $server.dnshostname | out-null -ea stop
+    }
+    Catch{
+        write-warning "$($server.name) is not reachable with WMI."
+        continue
+    }
     $results += Invoke-Command -ComputerName $server.dnshostname -ScriptBlock{ Get-WinEvent -FilterHashtable @{Logname = "System" ; ID = 10036} -ea silentlycontinue }
 }
 
