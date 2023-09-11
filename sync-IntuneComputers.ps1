@@ -1,21 +1,19 @@
 ﻿[CmdletBinding(DefaultParameterSetName = 'Default')]
 param(
-    [Parameter(Mandatory=$false)]
-    [String] $TenantId = "34a65f43-da31-4c41-9279-72e41a194e8a",
-    [Parameter(Mandatory=$false)]
-    [String] $ClientId = "01a07066-d946-4b49-aed2-3176c1c1f578",
+    [Parameter(Mandatory=$true)]
+    [String] $TenantId,
+    [Parameter(Mandatory=$true)]
+    [String] $ClientId,
     [Parameter(Mandatory=$false,HelpMessage="Set this property if using a Client Secret")]
     [String] $ClientSecret,
     [Parameter(Mandatory=$false,HelpMessage="Use to specify a certificate thumbprint")]
     [String] $ClientCert,
-    [Parameter(Mandatory=$False)]
-    [Switch] $NameMap,
-    [parameter(HelpMessage="Clean will delete computer accounts not found in AAD")]
+    [parameter(Mandatory=$false,HelpMessage="Clean will delete computer accounts not found in AAD")]
     [switch]$clean,
-    [Parameter(Mandatory=$false)]
-    [string]$NDESServer="jfa-ndes.ad.jfasselin.ca",
-    [Parameter(Mandatory=$false,HelpMessage="orgUnit must contain the DN of the OU where to create dummy computer accounts")]
-    $orgUnit="OU=Computers-AAD,OU=JFA,DC=ad,DC=jfasselin,DC=ca"
+    [Parameter(Mandatory=$true,HelpMessage="FQDN of the NDES server")]
+    [string]$NDESServer,
+    [Parameter(Mandatory=$true,HelpMessage="orgUnit must contain the DN of the OU where to create dummy computer accounts")]
+    $orgUnit
 )
 
 #Load and install required modules
@@ -76,14 +74,16 @@ Catch{
     }
 }
 #MSGraph module
-$MaximumVariableCount = 8192
-$MaximumFunctionCount = 8192
+Set-Variable -Name MaximumVariableCount -Value 8192 -Scope Global
+Set-Variable -Name MaximumFunctionCount -Value 8192 -Scope Global
 Try{
-    import-module -Name Microsoft.Graph -ea Stop -MinimumVersion '2.4.0'
+    import-module -Name Microsoft.Graph.Authentication -MinimumVersion '2.4.0' -ea Stop
+    import-module -Name Microsoft.Graph.DeviceManagement -MinimumVersion '2.4.0' -ea Stop
 }
 Catch{
     #Module not found, let's try installing it
     write-host "Attempting to install Microsoft.Graph module for Azure AD access."
+    pause
     Try{
         #Set TLS 1.2
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
