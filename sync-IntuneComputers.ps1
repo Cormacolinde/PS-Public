@@ -26,7 +26,7 @@ Catch{
     write-host "Attempting to install Active Directory module for AD and CA access."
     Try{
         #Install module
-        Install-WindowsFeature -Name RSAT-ADDS-Tools -ea stop
+        Install-WindowsFeature -Name RSAT-AD-PowerShell -ea stop
         import-module -name ActiveDirectory -ea stop
     }
     Catch{
@@ -37,7 +37,7 @@ Catch{
         }
         Catch{
             #Unable to install module, give a warning and quit.
-            write-warning "PowerShell module ActiveDirectory not found. Please install it manually."
+            write-warning "PowerShell module ActiveDirectory not found. Please install it manually. If it was just installed, you may have to relaunch all PowerShell windows to load the module."
             return
         }
     }
