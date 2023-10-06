@@ -26,7 +26,7 @@ Catch{
     write-host "Attempting to install Active Directory module for AD and CA access."
     Try{
         #Install module
-        Install-WindowsFeature -Name RSAT-AD-PowerShell -ea stop
+        Install-WindowsFeature -Name RSAT-AD-PowerShell -ea stop | out-null
         import-module -name ActiveDirectory -ea stop
     }
     Catch{
@@ -49,7 +49,7 @@ Try{
     if ($rsat_adcs_state -ne 'Installed'){
         Try{
             write-host "Attempting to install AD Certificate Services Administration tools."
-            install-windowsfeature -name RSAT-ADCS-Mgmt -ea stop
+            install-windowsfeature -name RSAT-ADCS-Mgmt -ea stop | out-null
         }
         Catch{
             #Unable to install module, give a warning and quit.
@@ -83,7 +83,6 @@ Try{
 Catch{
     #Module not found, let's try installing it
     write-host "Attempting to install Microsoft.Graph module for Azure AD access."
-    pause
     Try{
         #Set TLS 1.2
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
