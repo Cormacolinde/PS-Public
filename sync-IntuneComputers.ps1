@@ -92,7 +92,8 @@ Catch{
         Set-PSRepository PSGallery -InstallationPolicy Trusted -ea stop
         #Install module
         install-module -name Microsoft.Graph -Repository PSGallery -MinimumVersion '2.4.0' -Scope AllUsers -force -ea stop
-        import-module -name Microsoft.Graph -ea stop
+        import-module -Name Microsoft.Graph.Authentication -MinimumVersion '2.4.0' -ea Stop
+        import-module -Name Microsoft.Graph.DeviceManagement -MinimumVersion '2.4.0' -ea Stop
     }
     Catch{
         #Unable to install module, give a warning and quit.
@@ -106,7 +107,7 @@ Try{
 }
 Catch{
     #Module not found, let's try installing it
-    write-host "Attempting to install PSPKI module to manipualte certificates."
+    write-host "Attempting to install PSPKI module to manipulate certificates."
     Try{
         #Set TLS 1.2
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -115,7 +116,7 @@ Catch{
         #Trust repository
         Set-PSRepository PSGallery -InstallationPolicy Trusted -ea stop
         #Install module
-        install-module -name PSPKI -Repository PSGallery -MinimumVersion '4.0.0' -Scope AllUsers -force -ea stop
+        install-module -name PSPKI -Repository PSGallery -MinimumVersion '4.0.0' -Scope AllUsers -force -ea stop | out-null
         import-module -name PSPKI -ea stop
     }
     Catch{
@@ -124,31 +125,6 @@ Catch{
         return
     }
 }
-<#Windows AutopilotIntune module
-Try{
-    import-module -Name WindowsAutoPilotIntune -ea Stop -MinimumVersion '5.6'
-}
-Catch{
-    #Module not found, let's try installing it
-    write-host "Attempting to install WindowsAutoPilotIntune module for Azure AD access."
-    Try{
-        #Set TLS 1.2
-        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        #Install NuGet
-        Install-PackageProvider NuGet -Force -ea stop | out-null
-        #Trust repository
-        Set-PSRepository PSGallery -InstallationPolicy Trusted -ea stop
-        #Install module
-        install-module -name WindowsAutoPilotIntune -Repository PSGallery -MinimumVersion '5.6' -Scope AllUsers -force -ea stop
-        import-module -name WindowsAutoPilotIntune -ea stop
-    }
-    Catch{
-        #Unable to install module, give a warning and quit.
-        write-warning "PowerShell module WindowsAutoPilotIntune not found. Please install it manually from https://www.powershellgallery.com/packages/WindowsAutoPilotIntune/"
-        return
-    }
-}
-#>
 #region Functions
 function Reverse-CertificateIssuer {
     [CmdletBinding()]
@@ -198,7 +174,7 @@ $now = get-date
 #If a client secret was specified, use that
 if ($ClientSecret) {
     Try{
-        Connect-MSGraphApp -Tenant $TenantId -AppId $ClientId -AppSecret $ClientSecret -ea stop
+        Connect-MgGraph -Tenant $TenantId -AppId $ClientId -AppSecret $ClientSecret -ea stop
         write-host -ForegroundColor Yellow "Logged in to MS Graph using Client Secret specified on the command line. This is not secure, please switch to cert authentication."
     }
     Catch{
@@ -210,7 +186,7 @@ Else{
     if ($ClientCert) {
         #Check if cert exists
         Try{
-            gci "Cert:\CurrentUser\My\$clientcert" -ea stop
+            gci "Cert:\CurrentUser\My\$clientcert" -ea stop | out-null
         }
         Catch{
             write-warning "Specified client cert does not exist."

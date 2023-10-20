@@ -13,11 +13,12 @@ Param(
     [parameter(Mandatory=$true,ParameterSetName='smb')]
     [string]$subcafqdn,
     [parameter(Mandatory=$false,ParameterSetName='smb')]
-    $Share_path = "\\$subcafqdn\CA"
+    $Share_folder = "CA"
 )
 
 #Create folders
 $local_path = "$root_folder\Root"
+$Share_path = "\\$subcafqdn\$Share_folder"
 mkdir $local_path -ErrorAction Ignore
 #Check if USB drive exists, mount drive if SMB
 if ($usb) {
@@ -56,7 +57,7 @@ Else {
         return
     }
     #Define destination path
-    $dest_path = "K:\Root"
+    $dest_path = "K:\"
 }
 
 #Generate a new CRL
@@ -138,7 +139,7 @@ if ($backup.lastwritetime -lt $(get-date).AddMinutes(-5)) {
 }
 #Copy all files to the dest path
 Try{
-    copy-item -path $local_path -destination $dest_path -filter "*.*" -force -Recurse -container -ea stop
+    copy-item -path $local_path -destination $dest_path -force -Recurse -ea stop
 }
 Catch{
     write-warning "Copy to $dest_path failed."
