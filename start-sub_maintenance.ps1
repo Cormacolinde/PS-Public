@@ -18,7 +18,7 @@ Param (
     [string]$servershare="certenroll",
     [parameter(HelpMessage="Use this switch to clear all credentials and force asking for them")]
     [switch]$resetcredentials,
-    [parameter(Mandatory=$true,HelpMessage="SSH username",ParameterSetName='ssh')]
+    [parameter(Mandatory=$false,HelpMessage="SSH username",ParameterSetName='ssh')]
     $ssh_username,
     [parameter(HelpMessage="This is the folder that should contain all CRL and AIA source files.")]
     $crl_folder = "C:\Windows\system32\CertSrv\CertEnroll"
