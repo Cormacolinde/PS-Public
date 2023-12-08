@@ -360,6 +360,7 @@ switch ($protocol)
         #Create SCP session
         [pscredential]$ssh_creds = New-Object System.Management.Automation.PSCredential ($ssh_username, $ssh_secure)
         $session_options = New-WinSCPSessionOption -HostName $serverfqdn -Protocol Scp -SshPrivateKeyPath $creds_publiccassh_ppk -SecurePrivateKeyPassphrase $ssh_secure -GiveUpSecurityAndAcceptAnySshHostKey -Credential $ssh_creds
+        $transfer_options = New-WinSCPTransferOption -OverwriteMode Overwrite
         Try{
             $session = New-WinSCPSession -SessionOption $session_options -ea stop
         }
@@ -380,7 +381,7 @@ switch ($protocol)
         Try{
             $files = gci $temp_folder
             foreach ($file in $files) {
-                send-WinSCPItem -WinSCPSession $session -localPath $file.fullname -remotepath $serverpath -ea Stop | out-null
+                send-WinSCPItem -WinSCPSession $session -localPath $file.fullname -remotepath $serverpath -TransferOptions $transfer_options -ea Stop | out-null
             }
         }
         Catch{
